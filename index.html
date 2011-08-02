@@ -1,0 +1,63 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+	"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Rcarto Test</title>
+	<link rel="stylesheet" href="/static/css/terminal.css" type="text/css" media="screen" title="main" charset="utf-8">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div id="right">
+        <div id="files">
+            <h4>Available files</h4>
+            <p id='filelist'>
+            </p>
+            <p>
+                <form id="file-upload" action='http://localhost/R/hello.R' method="post" enctype="multipart/form-data" >
+                    <label for="fileToUpload">Upload new file </label><br />
+                    <input type="file" name="newFile" id="newFile" />
+                    <input type='hidden' value='file-upload' name='method'/>
+                    <input type='submit' name='submit' id='submit' />
+                </form>
+            </p>
+        </div>
+        <div id="status">
+            <h4>Running jobs</h4>
+            <p>
+                real-time jobs are limited to 30 second execution time. 
+                use 'add to queue' to run longer jobs'
+            </p>
+            <div id="total">
+                <div id="queue-length">0</div>
+                <div id="queue-speed">n/a</div>
+            </div>
+            <div id="jobs">
+            </div>
+        </div>
+        <div id="figures">
+            <h4>Output figures</h4>
+            <p>
+                write scripts to save in the 'figures/' directory and 
+                they will appear in this gallery.
+            </p>
+            <div id="gallery"></div>
+        </div>
+    </div>
+	<div id="script">
+        <h4>Enter long form R scripts here</h4>
+        <textarea id="script-value"></textarea>
+        <span class="option"><a id="execute">execute</a></span>
+        <span class="option"><a id="queue">add to queue</a></span>
+    </div>
+    <div id="r-output">
+        <h4>Server output</h4>
+        <span>Welcome to <a href="http://www.vizzuality.com/cartodb">CartoDB-R</a></span><br/>
+        <div id="terminal"></div>
+    </div>
+</body>
+</html>
+<script src="/static/js/mootools-core-1.3.2-full-compat-yc.js" type="text/javascript" charset="utf-8"></script>
+<script src="/static/js/terminal.js" type="text/javascript" charset="utf-8"></script>

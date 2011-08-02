@@ -1,0 +1,145 @@
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: #111;
+	color: #BFBFBF;
+	font: 14px Monaco, "Lucida Console", "Courier New", Courier;
+	padding: 5px;
+    position: relative;
+}
+div#script {
+  width: 52%;
+  float: left;
+  height: 100px;
+  margin-bottom: 20px;
+}
+div#r-output {
+  width: 52%;
+  height: 200px;
+  float: left;
+}
+div#r-output #terminal{
+  overflow-y: auto;
+  height: 80%;
+}
+div#right {
+  float: right;
+  width: 46%;
+}
+div#files {
+  width: 100%;
+  float: right;
+  margin-bottom: 10px;
+}
+div#files #filelist {
+    float: left;
+    padding: 2px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+div#files #filelist .userfile {
+    margin-bottom: 4px;
+}
+div#files #filelist .userfile div{
+    float: left;
+    margin-right: 15px;
+}
+div#files #filelist .userfile div.name{
+    color: white;
+    width: 300px;
+}
+
+div#status {
+  width: 100%;
+  float: right;
+  margin-bottom: 8px;
+}
+div#figures {
+  width: 100%;
+  float: right;
+}
+div#figures #gallery{
+    height: 260px;
+    margin-bottom: 5px;
+    overflow-y: auto;
+}
+div#figures #gallery .new-figure {
+    float: left;
+    width: 105px;
+    margin-top: 5px;
+}
+div#figures #gallery .new-figure div{
+    float: left;
+}
+div#script textarea {
+    position: relative;
+	background: #111;
+	color: #BFBFBF;
+    width: 98%;
+    height: 80%;
+    margin: 10px 0 10px 0;
+}
+a {
+	color: #CDA869;
+	text-decoration: none;
+}
+a:active, a:hover {
+	color: #CF6A4C;
+	text-decoration: underline;
+}
+
+b {
+	color: #fff;
+	font-weight: normal;
+}
+
+div {
+	overflow: hidden;
+	zoom: 1;
+}
+
+span {
+	float: left;
+}
+span.prompt {
+	padding-right: 10px;
+    width: auto;
+}
+span.cursor {
+	height: 16px;
+	width: 1px;
+    text-decoration: blink;
+}
+span.commandhelp {
+	width: 120px;
+}
+span.date {
+	color: #aaa;
+	width: 100px;
+}
+span.title {
+	width: 260px;
+}
+span.option {
+	float: left;
+    cursor: pointer;
+    padding-right: 15px;
+}
+img {
+	float: left;
+	margin-right: 5px;
+}
+
+td {
+	padding-right: 5px;
+}
+td.filesize {
+	text-align: right;
+}
+td.dir {
+	color: #75f;
+}
