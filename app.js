@@ -16,108 +16,70 @@
                 , r = new RSERVE.RservConnection();
     r.connect();
     
-    var sleepT = 40;
     var redis = require("redis");
-    var userClient = redis.createClient(6379, 'localhost')
-                   , msg_count = 0
-                   , workerClient = redis.createClient(6379, 'localhost')   
-                   , subClient = redis.createClient(6379, 'localhost');     
-     
+    var userClient = redis.createClient(6379, 'localhost', 'thoonk')
+                   , msg_count = 0;     
+    var Thoonk = require("thoonk").Thoonk,
+        thoonk = new Thoonk('localhost', 6379, 'thoonk')
+        
     var pio = require('socket.io');
     var io = pio.listen(app);
     
-    var jobid;
-    workerClient.get('jobid', function(err, id){ jobid = id });
-    
     var clients = {};
-     
-    function handleResponse(err, res) {
-      if (res == null) {
-        setTimeout(function() { popFromQueue(); }, sleepT);
-        //if (sleepT<30) sleepT++;
-      } else {
-        res = JSON.parse(res);
-        var msg = res.request;
-        var uid = res.uid;
-        var jid = res.jid;
-        
-      
-        r.request(msg, function(err, response){
-            //try a user specific announcement
-            io.sockets.socket(clients[uid]).emit('terminal-message', {message: uid +': '+ response}, function(){
+    
+    //the feed for our R job queue
+    jobs = thoonk.job('r_jobs');
+    
+    var resonseHandler = function(job, id, error){
+        if (error) {
+            //handle error
+            setTimeout(runJobs(),1);
+        } else {
+            if (job[0] != undefined){
+                job = JSON.parse(job[1]);
                 
-                workerClient.get(uid+":r:"+jid, function(err, res){
-                    res = JSON.parse(res);
-                    res.status = 'complete';
-                    res.result = response;
-                    var obj = JSON.stringify(res)
-                    //update the job status to complete and add the response
-                    workerClient.set(res.uid+":r:"+res.jid, obj);
-                }.bind(response));
-            });
-            /* TODO: Store the result as a file 
-             * and give the user a link to the result
-             * instead of pushing to the terminal
-             */
-            //start a new job
-            popFromQueue();
-        }.bind(uid,jid));
-      }
+                var msg = job.request;
+                var uid = job.uid;         
+                var sid = job.sid;         
+              
+                r.request(msg, function(response){
+                    if (response) {
+                        io.sockets.socket(sid).emit('terminal-message', {message: response});
+                    }
+                    setTimeout(runJobs(),1);
+                }.bind(sid));
+            }
+        }
     }
-    
-    
-    /* to pubsub a redis thread
-     * a one at a time method
-     */
-    function popFromQueue() {
-      workerClient.lpop('job-queue', handleResponse);
+    var runJobs = function(){
+        jobs.get(0, resonseHandler);
     }
-    popFromQueue();
-    
+    runJobs();
     
     //generic connection handlers
     io.sockets.on('connection', function(socket) {
-        
         socket.on('new-job', function (msg) {
-            jobid++;
-            workerClient.incr('jobid');
-            var jid = jobid;
             clients[msg.username] = socket.id;
             queue.len++;
             var obj = JSON.stringify({
                         request: msg.request, 
                         result: null,
                         uid: msg.username,
-                        jid: jid,
+                        sid: socket.id,
                         status: 'recieved'
                       })
-            //store a record of the user job
-            workerClient.set(msg.username+":r:"+jid, obj, function(err,res){
-                //add to job to the user's job list
-                workerClient.lpush(msg.username, jid);
-            });
-            workerClient.rpush('job-queue', obj, function(err,msg){
-                if (err) {
-                    socket.emit('terminal-message', {
-                        message: err
-                    });
-                } else {
-                    /*
-                    socket.emit('terminal-message', {
-                        message: 'success'
-                    });
-                    */
-                }
-                
-            }); 
-            
+                      
+            //add the job to thoonk
+            jobs.put(obj, function(job, id){}, false);
         });
         
         //disconnect handlers
         return socket.on('disconnect', function() {
             //clean up
+            //rm user from clients? should get rid of clients
         });
     });
+    
     
     var wrapper = function(req, res) {
     //http.createServer(function(req, res) {
@@ -139,17 +101,5 @@
         app.listen(3000);
         console.log("Express server listening on port %d", app.address().port);
     }
-    /*
-    http.createServer(function (req, res) {
-        var uri = url.parse(req.url).pathname; 
-        if (uri == '/') {uri = '/index.html'};
-        var filename =  "." + uri; //path.join(process.cwd(), uri);  
-        console.log(filename);
-        var self = this;
-        fs.readFile(filename, "binary", function(err, file) {  
-            res.writeHead(200);  
-            res.end(file, "utf-8");  
-        });
-    }).listen(3000);
-    */
+    
 }).call(this);

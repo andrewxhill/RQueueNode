@@ -1,0 +1,51 @@
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: #111;
+	color: #BFBFBF;
+	font: 14px Monaco, "Lucida Console", "Courier New", Courier;
+	padding: 5px;
+    position: relative;
+}
+div#script {
+  width: 52%;
+  float: left;
+  height: 200px;
+  margin-bottom: 20px;
+}
+div#r-output {
+  position: relative;
+  margin-top: 30px;
+  width: 52%;
+  height: 150px;
+  float: left;
+  border: 1px solid #cfcfcf;
+  overflow-y: auto;
+}
+div#r-output span{
+  width: 100%;
+  float: left;
+}
+div#script textarea {
+    position: relative;
+	background: #111;
+	color: #BFBFBF;
+    width: 98%;
+    height: 80%;
+    margin: 10px 0 10px 0;
+}
+a {
+	color: #CDA869;
+	text-decoration: none;
+}
+a:active, a:hover {
+	color: #CF6A4C;
+	text-decoration: underline;
+}
+a:hover {
+    cursor: pointer;
+}
