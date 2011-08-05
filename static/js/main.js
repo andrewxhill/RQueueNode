@@ -24,6 +24,7 @@ var Terminal = new Class({
     username: getUrlVars()["username"],
     objDiv:  document.getElementById("r-output"),
     currentScript:  document.getElementById("script-value"),
+    jobsDiv:  document.getElementById("queue-log"),
 	initialize: function(container) {
         //node.js socket.io connection
         this.socket = io.connect('http://localhost:3000');
@@ -31,6 +32,20 @@ var Terminal = new Class({
         this.socket.on('terminal-message',function(data) {
             this.out(data.message);
         }.bind(this));
+        this.socket.on('user-jobs-response',function(data) {
+            this.jobsDiv.getChildren().destroy();
+            for (var i=0; i<data.jobs.length; i++){
+                var w = new Element('div').addClass('job');
+                var j = new Element('a').addClass('job-link');
+                var s = new Element('div').addClass('job-status');
+                j.set('html', data.jobs[i].id);
+                s.set('html', data.jobs[i].status);
+                w.grab(j)
+                w.grab(s)
+                this.jobsDiv.grab(w)
+            }
+        }.bind(this));
+        this.socket.emit('user-jobs', {username: this.username});     
 	},
 	// Outputs a line of text
 	out: function(text) {

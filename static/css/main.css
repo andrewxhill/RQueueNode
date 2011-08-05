@@ -11,8 +11,36 @@ body {
 	padding: 5px;
     position: relative;
 }
+#left{
+    position: relative;
+    width: 48%;
+    height: 500px;
+    float: left;
+}
+#right{
+    background: #3f3f3f;
+    position: relative;
+    width: 38%;
+    margin: 20px 0px 0px 30px;
+    height: 500px;
+    float: left;
+    padding: 10px;
+}
+.job {
+ float: left;
+ margin: 5px 0 5px 0;
+ width: 80%;
+}
+.job .job-link {
+    float: left;
+    width: 30px;
+    margin-right: 10px;
+}
+.job .job-status {
+    float: left;
+}
 div#script {
-  width: 52%;
+  width: 100%;
   float: left;
   height: 200px;
   margin-bottom: 20px;
@@ -20,7 +48,7 @@ div#script {
 div#r-output {
   position: relative;
   margin-top: 30px;
-  width: 52%;
+  width: 100%;
   height: 150px;
   float: left;
   border: 1px solid #cfcfcf;

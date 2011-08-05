@@ -10,13 +10,20 @@
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-	<div id="script">
-        <h4>Enter long form R scripts here</h4>
-        <textarea id="script-value"></textarea>
-        <span class="option"><a id="queue">add to queue</a></span>
+    <div id="left">
+        <div id="script">
+            <h4>Enter long form R scripts here</h4>
+            <textarea id="script-value"></textarea>
+            <span class="option"><a id="queue">add to queue</a></span>
+        </div>
+        <div id="r-output">
+            
+        </div>
     </div>
-    <div id="r-output">
+    <div id="right">
+        <div id="queue-log">
         
+        </div>
     </div>
 </body>
 </html>

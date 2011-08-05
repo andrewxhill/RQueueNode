@@ -17,8 +17,13 @@
     r.connect();
     
     var redis = require("redis");
-    var userClient = redis.createClient(6379, 'localhost', 'thoonk')
-                   , msg_count = 0;     
+    var workerClient = redis.createClient(6379, 'localhost', 'thoonk')
+                   , msg_count = 0; 
+    /* need to init the job-id counter
+     * workerClient.set('job-id', 1); 
+     */
+    var jobid = 10;
+    
     var Thoonk = require("thoonk").Thoonk,
         thoonk = new Thoonk('localhost', 6379, 'thoonk')
         
@@ -29,7 +34,7 @@
     
     //the feed for our R job queue
     jobs = thoonk.job('r_jobs');
-    
+    if (13455 in io.sockets.socket(13455).namespace.manager.open);
     var resonseHandler = function(job, id, error){
         if (error) {
             //handle error
@@ -41,13 +46,37 @@
                 var msg = job.request;
                 var uid = job.uid;         
                 var sid = job.sid;         
+                var jid = job.jid;         
               
-                r.request(msg, function(response){
+                r.request(msg, function(uid,jid,response, error){
                     if (response) {
-                        io.sockets.socket(sid).emit('terminal-message', {message: response});
+                        
+                        var obj = JSON.stringify({
+                                    result: response, 
+                                    uid: uid,
+                                    jid: jid,
+                                  })
+                        workerClient.set(jid+":result", obj);
+                        workerClient.set(jid+":status", "complete");
+                        workerClient.lpush(uid+":log", JSON.stringify({id:jid,status:"complete"}));
+                        
+                        io.sockets.socket(sid).emit('terminal-message', {message: jid+": "+response});
+                        
+                        //Update their onscreen logs
+                        workerClient.lrange(uid+":log", 0, 10, function(err, res){
+                            var out = new Array();
+                            var ln = res.length;
+                            for (var i=0; i<ln; i++){
+                                out.push(JSON.parse(res[i]))
+                            }
+                            io.sockets.socket(sid).emit("user-jobs-response",{jobs: out});
+                        }.bind(sid));
+                    
+                    } else {
+                        workerClient.set(jid+":status", "error");
                     }
                     setTimeout(runJobs(),1);
-                }.bind(sid));
+                }.bind(sid, uid, jid));
             }
         }
     }
@@ -58,19 +87,35 @@
     
     //generic connection handlers
     io.sockets.on('connection', function(socket) {
+        
+        socket.on('user-jobs', function (msg) {
+            workerClient.lrange(msg.username+":log", 0, 10, function(err, res){
+                var out = new Array();
+                var ln = res.length;
+                for (var i=0; i<ln; i++){
+                    out.push(JSON.parse(res[i]))
+                }
+                socket.emit("user-jobs-response",{jobs: out});
+            });
+            
+        });
         socket.on('new-job', function (msg) {
+            //workerClient.rpop(msg.username+":log");
+            jobid++;
             clients[msg.username] = socket.id;
             queue.len++;
             var obj = JSON.stringify({
                         request: msg.request, 
-                        result: null,
                         uid: msg.username,
                         sid: socket.id,
-                        status: 'recieved'
+                        jid: jobid,
                       })
                       
             //add the job to thoonk
             jobs.put(obj, function(job, id){}, false);
+            workerClient.lpush(msg.username+":log", JSON.stringify({id:jobid,status:"submitted"}));
+            workerClient.set(jobid+":status", "running");
+            workerClient.set(jobid+":request", obj);
         });
         
         //disconnect handlers
