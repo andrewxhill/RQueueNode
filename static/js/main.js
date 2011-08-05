@@ -26,11 +26,13 @@ var Terminal = new Class({
     currentScript:  document.getElementById("script-value"),
     jobsDiv:  document.getElementById("queue-log"),
 	initialize: function(container) {
+        self = this;
         //node.js socket.io connection
         this.socket = io.connect('http://localhost:3000');
 		this.terminal = container;
         this.socket.on('terminal-message',function(data) {
-            this.out(data.message);
+            console.log(data);
+            this.out(JSON.stringify(data.message, null, 4));
         }.bind(this));
         this.socket.on('user-jobs-response',function(data) {
             this.jobsDiv.getChildren().destroy();
@@ -46,10 +48,17 @@ var Terminal = new Class({
             }
         }.bind(this));
         this.socket.emit('user-jobs', {username: this.username});     
+        
+        $('queue').addEvent('click',function(){
+            self.queue($('script-value').value);
+        });
+            
+            
 	},
 	// Outputs a line of text
 	out: function(text) {
-		var p = new Element('span');
+        this.terminal.getChildren().destroy();
+		var p = new Element('pre');
 		p.set('html', text);
 		this.terminal.grab(p);
 	},
@@ -73,11 +82,11 @@ var Terminal = new Class({
 
 var TestScript = new Class({
 	initialize: function() {
-        this.delta = 3000;
+        this.delta = 10000;
         this.run();
     },
     run: function(){
-        window.terminal.queue('print('+Math.random()+')');
+        window.terminal.queue('print("test job (rand.num): '+Math.random()+'")');
         setTimeout(function(){
             window.testscript.run();
         },this.delta);
@@ -86,5 +95,5 @@ var TestScript = new Class({
 
 $(window).addEvent('domready', function() {
 	window.terminal = new Terminal($('r-output'));
-    window.testscript = new TestScript();
+    //window.testscript = new TestScript();
 });
