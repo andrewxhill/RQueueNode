@@ -82,9 +82,11 @@
                          * send the results to the user if they are still connected
                          * to the same socket
                          */
-                        console.log(response);
-                        io.sockets.socket(sid).emit('terminal-message', {message: response.data});
-                        
+                        if (response.data != null){
+                            io.sockets.socket(sid).emit('terminal-message', {message: response.data});
+                        } else {
+                            io.sockets.socket(sid).emit('terminal-message', {message: response});
+                        }
                         /*
                          * also tell the update the user's onscreen log
                          */
