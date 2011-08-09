@@ -27,9 +27,16 @@
     var Thoonk = require("thoonk").Thoonk,
         thoonk = new Thoonk('localhost', 6379, 'thoonk')
         
-    var pio = require('socket.io');
-    var io = pio.listen(app);
-    
+    var io = require('socket.io').listen(app);
+        io.enable('browser client minification');  // send minified client
+        io.set('log level', 1);                    // reduce logging
+        io.set('transports', [                     // enable all transports (optional if you want flashsocket)
+            'websocket'
+          , 'flashsocket'
+          , 'htmlfile'
+          , 'xhr-polling'
+          , 'jsonp-polling'
+        ]);
     var clients = {};
     
     //the feed for our R job queue
@@ -130,6 +137,12 @@
                 socket.emit("user-jobs-response",{jobs: out});
             });
             
+        });
+        socket.on('lookup-job', function (msg) {
+            clients[msg.username] = socket.id;
+            workerClient.get(msg.jobid+":result", function(err, res){
+                socket.emit("terminal-message",{message: JSON.parse(res).result.data});
+            });
         });
         
         /*

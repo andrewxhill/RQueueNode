@@ -29,6 +29,10 @@ var Terminal = new Class({
         self = this;
         //node.js socket.io connection
         this.socket = io.connect('http://localhost:3000');
+        this.socket.on('disconnect', function(){
+            console.log('whoops');
+            self.socket = io.connect('http://localhost:3000');
+        });
 		this.terminal = container;
         this.socket.on('terminal-message',function(data) {
             console.log(data);
@@ -41,6 +45,10 @@ var Terminal = new Class({
                 var j = new Element('a').addClass('job-link');
                 var s = new Element('div').addClass('job-status');
                 j.set('html', data.jobs[i].id);
+                j.addEvent('click',function(i, ev){
+                    console.log(data.jobs[i].id);
+                    self.socket.emit('lookup-job', {jobid: data.jobs[i].id});  
+                }.bind(data, i));
                 s.set('html', data.jobs[i].status);
                 w.grab(j)
                 w.grab(s)
@@ -51,9 +59,7 @@ var Terminal = new Class({
         
         $('queue').addEvent('click',function(){
             self.queue($('script-value').value);
-        });
-            
-            
+        });            
 	},
 	// Outputs a line of text
 	out: function(text) {
